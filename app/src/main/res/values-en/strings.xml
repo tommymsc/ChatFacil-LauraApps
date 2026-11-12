@@ -1,0 +1,17 @@
+<resources>
+<string name="app_name">Easy Chat: No Save Contact</string><string name="subtitle">Quick conversations without saving contacts</string>
+<string name="chat">Chat</string><string name="recent">Recent</string><string name="templates">Templates</string><string name="settings">Settings</string>
+<string name="number">Phone number</string><string name="number_hint">e.g. 5551234567 or +15551234567</string><string name="country">Country / dialing code</string><string name="message_optional">Prepared message (optional)</string>
+<string name="paste">Paste number</string><string name="open_chat">Open conversation</string><string name="copy_link">Copy link</string><string name="share_link">Share link</string><string name="favorite">Add to favorites</string>
+<string name="standard">WhatsApp</string><string name="business">WhatsApp Business</string><string name="automatic">Choose automatically</string>
+<string name="empty">No items yet</string><string name="saved">Saved</string><string name="delete">Delete</string><string name="use">Use</string>
+<string name="template_title">Template name</string><string name="template_text">Template text</string><string name="add_template">Save template</string><string name="template_hint">Hello, I'd like information about...</string>
+<string name="favorite_name">Name for this number</string><string name="favorite_default">Frequent contact</string><string name="favorites">Favorites</string><string name="history">History</string>
+<string name="clear_history">Clear history</string><string name="clear_all">Delete all local data</string><string name="confirm_delete">Delete information saved on this device?</string>
+<string name="privacy">Privacy and security</string><string name="privacy_copy">We do not read contacts or messages. Your numbers, favorites, and templates remain on this device. Google AdMob may process ad data based on your choices.</string>
+<string name="privacy_policy">View privacy policy</string><string name="privacy_options">Ad privacy options</string><string name="independent">Independent app by LauraApps. Not affiliated with WhatsApp or Meta.</string>
+<string name="error_number">Enter a valid international phone number (8 to 15 digits).</string><string name="error_open">No app found to open this link.</string><string name="copied">Link copied</string>
+<string name="received">Shared text received. Check the phone number.</string>
+<string name="country_dominican">Dominican Republic</string><string name="country_mexico">Mexico</string><string name="country_colombia">Colombia</string><string name="country_spain">Spain</string><string name="country_us">United States</string><string name="country_argentina">Argentina</string><string name="country_peru">Peru</string><string name="country_chile">Chile</string><string name="country_brazil">Brazil</string><string name="country_venezuela">Venezuela</string>
+<string name="choose_template">Use template</string><string name="ads_notice">Test ads in this version.</string>
+</resources>
