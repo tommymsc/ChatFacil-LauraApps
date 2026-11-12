@@ -5,7 +5,7 @@
 <string name="paste">Paste number</string><string name="open_chat">Open conversation</string><string name="copy_link">Copy link</string><string name="share_link">Share link</string><string name="favorite">Add to favorites</string>
 <string name="standard">WhatsApp</string><string name="business">WhatsApp Business</string><string name="automatic">Choose automatically</string>
 <string name="empty">No items yet</string><string name="saved">Saved</string><string name="delete">Delete</string><string name="use">Use</string>
-<string name="template_title">Template name</string><string name="template_text">Template text</string><string name="add_template">Save template</string><string name="template_hint">Hello, I'd like information about...</string>
+<string name="template_title">Template name</string><string name="template_text">Template text</string><string name="add_template">Save template</string><string name="template_hint">Hello, I would like information about...</string>
 <string name="favorite_name">Name for this number</string><string name="favorite_default">Frequent contact</string><string name="favorites">Favorites</string><string name="history">History</string>
 <string name="clear_history">Clear history</string><string name="clear_all">Delete all local data</string><string name="confirm_delete">Delete information saved on this device?</string>
 <string name="privacy">Privacy and security</string><string name="privacy_copy">We do not read contacts or messages. Your numbers, favorites, and templates remain on this device. Google AdMob may process ad data based on your choices.</string>
