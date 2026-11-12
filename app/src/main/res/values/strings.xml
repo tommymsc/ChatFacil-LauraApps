@@ -1,0 +1,17 @@
+<resources>
+<string name="app_name">Chat Fácil: Sin Guardar Número</string><string name="subtitle">Conversaciones rápidas, sin guardar contactos</string>
+<string name="chat">Chat</string><string name="recent">Recientes</string><string name="templates">Plantillas</string><string name="settings">Ajustes</string>
+<string name="number">Número de teléfono</string><string name="number_hint">Ej. 8095551234 o +18095551234</string><string name="country">País / prefijo</string><string name="message_optional">Mensaje preparado (opcional)</string>
+<string name="paste">Pegar número</string><string name="open_chat">Abrir conversación</string><string name="copy_link">Copiar enlace</string><string name="share_link">Compartir enlace</string><string name="favorite">Agregar a favoritos</string>
+<string name="standard">WhatsApp</string><string name="business">WhatsApp Business</string><string name="automatic">Elegir automáticamente</string>
+<string name="empty">Todavía no hay elementos</string><string name="saved">Guardado</string><string name="delete">Eliminar</string><string name="use">Usar</string>
+<string name="template_title">Nombre de plantilla</string><string name="template_text">Texto de la plantilla</string><string name="add_template">Guardar plantilla</string><string name="template_hint">Hola, quisiera información sobre...</string>
+<string name="favorite_name">Nombre para este número</string><string name="favorite_default">Contacto frecuente</string><string name="favorites">Favoritos</string><string name="history">Historial</string>
+<string name="clear_history">Borrar historial</string><string name="clear_all">Borrar todos los datos locales</string><string name="confirm_delete">¿Eliminar la información guardada en este dispositivo?</string>
+<string name="privacy">Privacidad y seguridad</string><string name="privacy_copy">No leemos contactos ni mensajes. Tus números, favoritos y plantillas permanecen en este dispositivo. Google AdMob puede tratar datos publicitarios según tus preferencias.</string>
+<string name="privacy_policy">Ver política de privacidad</string><string name="privacy_options">Opciones de privacidad de anuncios</string><string name="independent">Aplicación independiente de LauraApps. No afiliada a WhatsApp ni a Meta.</string>
+<string name="error_number">Introduce un número internacional válido (8 a 15 dígitos).</string><string name="error_open">No se encontró una aplicación para abrir el enlace.</string><string name="copied">Enlace copiado</string>
+<string name="received">Texto compartido recibido. Comprueba el número.</string>
+<string name="country_dominican">República Dominicana</string><string name="country_mexico">México</string><string name="country_colombia">Colombia</string><string name="country_spain">España</string><string name="country_us">Estados Unidos</string><string name="country_argentina">Argentina</string><string name="country_peru">Perú</string><string name="country_chile">Chile</string><string name="country_brazil">Brasil</string><string name="country_venezuela">Venezuela</string>
+<string name="choose_template">Usar plantilla</string><string name="ads_notice">Anuncios de prueba en esta versión.</string>
+</resources>
