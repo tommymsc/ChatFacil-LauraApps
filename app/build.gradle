@@ -1,8 +1,9 @@
 plugins { id 'com.android.application' }
 def realAds = providers.gradleProperty('enableRealAds').orElse('false').get().toBoolean()
-def appAdId = providers.gradleProperty('adMobAppId').orElse('').get()
-def bannerAdId = providers.gradleProperty('adMobBannerId').orElse('').get()
-def validReal = realAds && appAdId ==~ /ca-app-pub-\d{16}~\d{10}/ && bannerAdId ==~ /ca-app-pub-\d{16}\/\d{10}/
+def appAdId = providers.gradleProperty('adMobAppId').orElse('ca-app-pub-2506564165861733~1071661556').get()
+def bannerAdId = providers.gradleProperty('adMobBannerId').orElse('ca-app-pub-2506564165861733/3799052197').get()
+def interstitialAdId = providers.gradleProperty('adMobInterstitialId').orElse('ca-app-pub-2506564165861733/3586144251').get()
+def validReal = realAds && appAdId ==~ /ca-app-pub-\d{16}~\d{10}/ && bannerAdId ==~ /ca-app-pub-\d{16}\/\d{10}/ && interstitialAdId ==~ /ca-app-pub-\d{16}\/\d{10}/
 if (realAds && !validReal) throw new GradleException('IDs reales AdMob inválidos')
 android {
     namespace 'com.lauraapps.chatfacil'
@@ -16,6 +17,7 @@ android {
         manifestPlaceholders = [adMobAppId: validReal ? appAdId : 'ca-app-pub-3940256099942544~3347511713']
         buildConfigField 'boolean', 'REAL_ADS', validReal.toString()
         buildConfigField 'String', 'BANNER_ID', '"' + (validReal ? bannerAdId : 'ca-app-pub-3940256099942544/6300978111') + '"'
+        buildConfigField 'String', 'INTERSTITIAL_ID', '"' + (validReal ? interstitialAdId : 'ca-app-pub-3940256099942544/1033173712') + '"'
     }
     buildFeatures { buildConfig true }
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
@@ -26,6 +28,7 @@ android {
             manifestPlaceholders = [adMobAppId: 'ca-app-pub-3940256099942544~3347511713']
             buildConfigField 'boolean', 'REAL_ADS', 'false'
             buildConfigField 'String', 'BANNER_ID', '"ca-app-pub-3940256099942544/6300978111"'
+            buildConfigField 'String', 'INTERSTITIAL_ID', '"ca-app-pub-3940256099942544/1033173712"'
         }
         release {
             minifyEnabled false
@@ -33,6 +36,7 @@ android {
             manifestPlaceholders = [adMobAppId: validReal ? appAdId : 'ca-app-pub-3940256099942544~3347511713']
             buildConfigField 'boolean', 'REAL_ADS', validReal.toString()
             buildConfigField 'String', 'BANNER_ID', '"' + (validReal ? bannerAdId : 'ca-app-pub-3940256099942544/6300978111') + '"'
+            buildConfigField 'String', 'INTERSTITIAL_ID', '"' + (validReal ? interstitialAdId : 'ca-app-pub-3940256099942544/1033173712') + '"'
         }
     }
 }
