@@ -35,6 +35,7 @@ public class MainActivity extends Activity {
   private android.content.SharedPreferences prefs;
   private ConsentInformation consent;
   private boolean adsReady=false;
+  private boolean adsLoading=false;
   private AdView banner;
   private TextView liveStatus;
 
@@ -46,10 +47,20 @@ public class MainActivity extends Activity {
     history=load("history"); favorites=load("favorites"); templates=load("templates");
     selectedCountry=prefs.getInt("selected_country",defaultCountry());
     selectedApp=prefs.getInt("selected_app",0);
-    readShare(getIntent());draw();requestConsent();
+    if(state!=null){phone=state.getString("draft_phone","");msg=state.getString("draft_message","");tab=state.getInt("selected_tab",0);}
+    else readShare(getIntent());
+    draw();requestConsent();
   }
   @Override protected void onNewIntent(Intent intent){
-    super.onNewIntent(intent);setIntent(intent);readShare(intent);tab=0;draw();
+    super.onNewIntent(intent);
+    rememberFields();
+    setIntent(intent);readShare(intent);tab=0;draw();
+  }
+  @Override protected void onSaveInstanceState(Bundle out){
+    rememberFields();
+    out.putString("draft_phone",phone);out.putString("draft_message",msg);
+    out.putInt("selected_tab",tab);
+    super.onSaveInstanceState(out);
   }
   private int defaultCountry(){
     String country=java.util.Locale.getDefault().getCountry();
@@ -117,12 +128,15 @@ public class MainActivity extends Activity {
   private void readShare(Intent intent){
     if(intent==null || !Intent.ACTION_SEND.equals(intent.getAction()) || !"text/plain".equals(intent.getType()))return;
     String incoming=intent.getStringExtra(Intent.EXTRA_TEXT);if(incoming==null)return;
+    if(incoming.length()>5000)incoming=incoming.substring(0,5000);
+    phone="";msg="";
     Matcher matcher=Pattern.compile("(?<!\\d)(?:\\+|00)?[0-9][0-9 ()\\-.]{6,24}[0-9](?!\\d)").matcher(incoming);
     if(matcher.find()){
       phone=matcher.group().trim();
       String remaining=(incoming.substring(0,matcher.start())+incoming.substring(matcher.end())).trim();
       if(!remaining.isEmpty() && remaining.length()<2000)msg=remaining;
     }else if(incoming.length()<2000)msg=incoming;
+    intent.removeExtra(Intent.EXTRA_TEXT);
     Toast.makeText(this,R.string.received,Toast.LENGTH_SHORT).show();
   }
   private void drawChat(){
@@ -150,7 +164,7 @@ public class MainActivity extends Activity {
     LinearLayout messageCard=col();addCard(area,messageCard,8);
     messageCard.addView(text("✎  "+getString(R.string.message_optional),16,true));
     msgField=edit(msg,R.string.template_hint,InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-    msgField.setSingleLine(false);msgField.setMinLines(3);messageCard.addView(msgField);
+    msgField.setSingleLine(false);msgField.setMinLines(3);msgField.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(1500)});messageCard.addView(msgField);
     if(templates.length()>0)messageCard.addView(button(R.string.choose_template,()->{
       String[] names=new String[templates.length()];
       for(int i=0;i<names.length;i++)names[i]=templates.optJSONObject(i).optString("name");
@@ -204,6 +218,7 @@ public class MainActivity extends Activity {
   private void addFavorite(){
     String n=e164();if(n==null){phoneField.setError(getString(R.string.error_number));return;}
     EditText name=edit("",R.string.favorite_default,InputType.TYPE_CLASS_TEXT);
+    name.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(60)});
     new AlertDialog.Builder(this).setTitle(R.string.favorite_name).setView(name)
       .setNegativeButton(android.R.string.cancel,null).setPositiveButton(R.string.saved,(d,w)->{
         try{JSONArray all=new JSONArray();for(int j=0;j<favorites.length();j++){JSONObject x=favorites.optJSONObject(j);if(x!=null && !n.equals(x.optString("number")))all.put(x);}
@@ -236,13 +251,16 @@ public class MainActivity extends Activity {
     area.addView(text("▤  "+getString(R.string.templates),21,true));hint(R.string.templates_intro);
     LinearLayout templateCard=col();addCard(area,templateCard,12);
     templateCard.addView(text(getString(R.string.template_title),14,true));
-    EditText name=edit("",R.string.template_title,InputType.TYPE_CLASS_TEXT);templateCard.addView(name);
+    EditText name=edit("",R.string.template_title,InputType.TYPE_CLASS_TEXT);name.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(60)});templateCard.addView(name);
     templateCard.addView(text(getString(R.string.template_text),14,true));EditText body=edit("",R.string.template_hint,InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-    body.setSingleLine(false);body.setMinLines(3);templateCard.addView(body);
+    body.setSingleLine(false);body.setMinLines(3);body.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(1500)});templateCard.addView(body);
     templateCard.addView(accentButton(R.string.add_template,()->{
       String n=name.getText().toString().trim(),v=body.getText().toString().trim();
       if(n.isEmpty()){name.setError(getString(R.string.template_title));return;}if(v.isEmpty()){body.setError(getString(R.string.template_text));return;}
-      try{JSONObject x=new JSONObject();x.put("name",n);x.put("body",v);templates.put(x);save("templates",templates);draw();}
+      try{JSONObject x=new JSONObject();x.put("name",n);x.put("body",v);
+        JSONArray next=new JSONArray();next.put(x);
+        for(int j=0;j<templates.length() && next.length()<60;j++)next.put(templates.get(j));
+        templates=next;save("templates",templates);draw();}
       catch(Exception ignored){}
     }));
     for(int i=0;i<templates.length();i++){JSONObject x=templates.optJSONObject(i);if(x!=null)entry(x.optString("name"),x.optString("body"),()->{msg=x.optString("body");tab=0;draw();},()->{remove("templates",x);draw();});}
@@ -289,12 +307,16 @@ public class MainActivity extends Activity {
   }
   private void startAds(){
     if(adsReady)return;adsReady=true;
-    new Thread(()->MobileAds.initialize(this,info->runOnUiThread(this::showBanner))).start();
+    MobileAds.initialize(getApplicationContext(),info->runOnUiThread(this::showBanner));
   }
   private void showBanner(){
     if(!adsReady || adsArea==null)return;
-    if(banner!=null){if(banner.getParent() instanceof android.view.ViewGroup)((android.view.ViewGroup)banner.getParent()).removeView(banner);adsArea.addView(banner);return;}
-    banner=new AdView(this);banner.setAdUnitId(BuildConfig.BANNER_ID);banner.setAdSize(AdSize.BANNER);adsArea.addView(banner);banner.loadAd(new AdRequest.Builder().build());
+    if(banner!=null){
+      if(banner.getParent() instanceof android.view.ViewGroup)((android.view.ViewGroup)banner.getParent()).removeView(banner);
+      adsArea.addView(banner);return;
+    }
+    banner=new AdView(this);banner.setAdUnitId(BuildConfig.BANNER_ID);banner.setAdSize(AdSize.BANNER);
+    adsArea.addView(banner);banner.loadAd(new AdRequest.Builder().build());
   }
   @Override protected void onPause(){if(banner!=null)banner.pause();super.onPause();}
   @Override protected void onResume(){super.onResume();if(banner!=null)banner.resume();}
