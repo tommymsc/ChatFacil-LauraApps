@@ -24,4 +24,10 @@
 <string name="language_es">Español</string>
 <string name="language_en">English</string>
 <string name="apply_language">Apply language</string>
+<string name="quick_ready">Ready to connect</string>
+<string name="number_empty">Enter a number to get started.</string>
+<string name="number_ready">Number ready to open a chat.</string>
+<string name="number_check">Check the number and selected country code.</string>
+<string name="empty_favorites">Your favorite numbers will appear here when you save them.</string>
+<string name="empty_history">Chats you open will appear here so you can reuse them easily.</string>
 </resources>
