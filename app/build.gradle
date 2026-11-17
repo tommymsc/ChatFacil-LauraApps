@@ -12,8 +12,8 @@ android {
         applicationId 'com.lauraapps.chatfacil'
         minSdk 24
         targetSdk 36
-        versionCode 6
-        versionName '1.0.5'
+        versionCode 7
+        versionName '1.0.6'
         manifestPlaceholders = [adMobAppId: validReal ? appAdId : 'ca-app-pub-3940256099942544~3347511713']
         buildConfigField 'boolean', 'REAL_ADS', validReal.toString()
         buildConfigField 'String', 'BANNER_ID', '"' + (validReal ? bannerAdId : 'ca-app-pub-3940256099942544/6300978111') + '"'
