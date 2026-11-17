@@ -2,7 +2,7 @@ name: Android Debug APK
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, feature/admob-chat-facil-real-ids]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -28,6 +28,38 @@ jobs:
           file app/src/main/res/drawable-nodpi/launcher.webp
       - name: Run unit tests and build APK with test ad IDs
         run: gradle --no-daemon :app:testDebugUnitTest :app:assembleDebug --stacktrace
+      - name: Restore production upload signing key if configured
+        env:
+          SIGNING_STORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -n "$SIGNING_STORE_BASE64" ] && [ -n "$ANDROID_KEYSTORE_PASSWORD" ] && [ -n "$ANDROID_KEY_ALIAS" ] && [ -n "$ANDROID_KEY_PASSWORD" ]; then
+            printf '%s' "$SIGNING_STORE_BASE64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+            echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/upload.jks" >> "$GITHUB_ENV"
+            echo "ANDROID_KEYSTORE_PASSWORD=$ANDROID_KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+            echo "ANDROID_KEY_ALIAS=$ANDROID_KEY_ALIAS" >> "$GITHUB_ENV"
+            echo "ANDROID_KEY_PASSWORD=$ANDROID_KEY_PASSWORD" >> "$GITHUB_ENV"
+            echo "Signing key configured: production AAB will be signed."
+          else
+            echo "No configured upload signing key: production AAB will remain unsigned."
+          fi
+      - name: Build release AAB with production ad identifiers
+        run: gradle --no-daemon :app:bundleRelease -PenableRealAds=true --stacktrace
+      - name: Check AAB signature status
+        run: |
+          if [ -n "${ANDROID_KEYSTORE_PATH:-}" ]; then
+            jarsigner -verify -verbose -certs app/build/outputs/bundle/release/*.aab > /tmp/aab-verify.txt
+            grep -E "jar verified|jar is unsigned" /tmp/aab-verify.txt || true
+          else
+            echo "UNSIGNED AAB (not ready for upload to Google Play)" >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ChatFacil-1.0.5-release-AAB
+          path: app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
           name: ChatFacil-debug-APK
