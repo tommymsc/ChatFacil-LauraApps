@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.content.res.Configuration;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.view.*;
@@ -30,6 +31,7 @@ public class MainActivity extends Activity {
   private boolean adsReady=false;
   private AdView banner;
 
+  @Override protected void attachBaseContext(Context base){super.attachBaseContext(Language.wrap(base));}
   @Override public void onCreate(Bundle state){
     super.onCreate(state);
     getWindow().setStatusBarColor(INK);
@@ -74,23 +76,23 @@ public class MainActivity extends Activity {
   }
   private void draw(){
     phoneField=null;msgField=null;
-    base=col();base.setBackgroundColor(0xfff6f8fa);setContentView(base);
-    LinearLayout head=col();head.setPadding(dp(18),dp(15),dp(18),dp(10));head.setBackgroundColor(INK);
-    TextView title=text(getString(R.string.app_name),19,true);title.setTextColor(-1);head.addView(title);
+    base=col();base.setBackgroundColor(0xfff4f7f8);setContentView(base);
+    LinearLayout head=col();head.setPadding(dp(21),dp(21),dp(21),dp(16));head.setBackgroundColor(INK);
+    TextView title=text(getString(R.string.app_name),21,true);title.setTextColor(-1);head.addView(title);
     TextView sub=text(getString(R.string.subtitle),12,false);sub.setTextColor(0xffcad9df);head.addView(sub);base.addView(head);
     LinearLayout tabs=row();tabs.setBackgroundColor(-1);int[] names={R.string.chat,R.string.recent,R.string.templates,R.string.settings};
     for(int i=0;i<4;i++){final int j=i;TextView t=text(getString(names[i]),13,i==tab);t.setGravity(Gravity.CENTER);t.setTextColor(i==tab?GREEN:MUTE);
-      t.setPadding(dp(1),dp(12),dp(1),dp(12));tabs.addView(t,new LinearLayout.LayoutParams(0,dp(47),1));
+      t.setPadding(dp(1),dp(12),dp(1),dp(12));tabs.addView(t,new LinearLayout.LayoutParams(0,dp(51),1));
       t.setOnClickListener(v->{rememberFields();tab=j;draw();});
     }base.addView(tabs);
-    ScrollView scroll=new ScrollView(this);area=col();area.setPadding(dp(17),dp(14),dp(17),dp(18));scroll.addView(area);base.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
+    ScrollView scroll=new ScrollView(this);scroll.setFillViewport(false);area=col();area.setPadding(dp(19),dp(18),dp(19),dp(22));scroll.addView(area);base.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
     if(tab==0)drawChat();else if(tab==1)drawRecent();else if(tab==2)drawTemplates();else drawSettings();
     adsArea=col();base.addView(adsArea);showBanner();
   }
   private void readShare(Intent intent){
     if(intent==null || !Intent.ACTION_SEND.equals(intent.getAction()) || !"text/plain".equals(intent.getType()))return;
     String incoming=intent.getStringExtra(Intent.EXTRA_TEXT);if(incoming==null)return;
-    Matcher matcher=Pattern.compile("(?<!\\d)\\+?[0-9][0-9 ()\\-.]{6,24}[0-9](?!\\d)").matcher(incoming);
+    Matcher matcher=Pattern.compile("(?<!\\d)(?:\\+|00)?[0-9][0-9 ()\\-.]{6,24}[0-9](?!\\d)").matcher(incoming);
     if(matcher.find()){
       phone=matcher.group().trim();
       String remaining=(incoming.substring(0,matcher.start())+incoming.substring(matcher.end())).trim();
@@ -99,13 +101,14 @@ public class MainActivity extends Activity {
     Toast.makeText(this,R.string.received,Toast.LENGTH_SHORT).show();
   }
   private void drawChat(){
+    area.addView(text(getString(R.string.hero_title),23,true));hint(R.string.hero_subtitle);
     label(R.string.country);countryField=spinner(countryLabels(),selectedCountry);area.addView(countryField);
     label(R.string.number);phoneField=edit(phone,R.string.number_hint,InputType.TYPE_CLASS_PHONE);area.addView(phoneField);
     area.addView(button(R.string.paste,()->{
       ClipboardManager c=(ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
       if(c!=null && c.hasPrimaryClip()){
         CharSequence value=c.getPrimaryClip().getItemAt(0).coerceToText(this);
-        Matcher m=Pattern.compile("\\+?[0-9][0-9 ()\\-.]{6,24}[0-9]").matcher(value);
+        Matcher m=Pattern.compile("(?:\\+|00)?[0-9][0-9 ()\\-.]{6,24}[0-9]").matcher(value);
         phoneField.setText(m.find()?m.group():value);phoneField.setSelection(phoneField.length());
       }
     }));
@@ -116,9 +119,10 @@ public class MainActivity extends Activity {
       for(int i=0;i<names.length;i++)names[i]=templates.optJSONObject(i).optString("name");
       new AlertDialog.Builder(this).setItems(names,(d,which)->msgField.setText(templates.optJSONObject(which).optString("body"))).show();
     }));
-    label(R.string.automatic);
+    label(R.string.chat_app_label);
     appField=spinner(new String[]{getString(R.string.automatic),getString(R.string.standard),getString(R.string.business)},selectedApp);area.addView(appField);
-    area.addView(button(R.string.open_chat,this::openChat));
+    Button open=button(R.string.open_chat,this::openChat);open.setTextColor(Color.WHITE);open.setBackgroundTintList(android.content.res.ColorStateList.valueOf(GREEN));area.addView(open);
+    hint(R.string.manual_send_note);
     LinearLayout links=row();
     links.addView(button(R.string.copy_link,()->{String u=link();if(u!=null){((ClipboardManager)getSystemService(CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText("chat link",u));Toast.makeText(this,R.string.copied,Toast.LENGTH_SHORT).show();}}),new LinearLayout.LayoutParams(0,-2,1));
     links.addView(button(R.string.share_link,()->{String u=link();if(u!=null){Intent i=new Intent(Intent.ACTION_SEND);i.setType("text/plain");i.putExtra(Intent.EXTRA_TEXT,u);startActivity(Intent.createChooser(i,getString(R.string.share_link)));}}),new LinearLayout.LayoutParams(0,-2,1));
@@ -127,12 +131,8 @@ public class MainActivity extends Activity {
   }
   private String digits(String s){return s.replaceAll("[^0-9]","");}
   private String e164(){
-    String raw=phoneField.getText().toString().trim();if(raw.isEmpty())return null;
-    String n=digits(raw);
-    if(raw.startsWith("00"))n=n.substring(2);
-    else if(!raw.startsWith("+"))n=codes[countryField.getSelectedItemPosition()]+n;
-    if(n.length()<8 || n.length()>15 || n.startsWith("0"))return null;
-    return n;
+    if(phoneField==null || countryField==null)return null;
+    return PhoneNumbers.normalize(phoneField.getText().toString(),codes[countryField.getSelectedItemPosition()]);
   }
   private String link(){
     String n=e164();if(n==null){phoneField.setError(getString(R.string.error_number));return null;}
@@ -168,9 +168,9 @@ public class MainActivity extends Activity {
       }).show();
   }
   private void drawRecent(){
-    area.addView(text(getString(R.string.favorites),19,true));if(favorites.length()==0)hint(R.string.empty);
+    area.addView(text(getString(R.string.favorites),21,true));if(favorites.length()==0)hint(R.string.empty);
     for(int i=0;i<favorites.length();i++){JSONObject x=favorites.optJSONObject(i);if(x!=null)entry(x.optString("name"),"+"+x.optString("number"),()->{phone="+"+x.optString("number");msg="";tab=0;draw();},()->{remove("favorites",x);draw();});}
-    area.addView(text(getString(R.string.history),19,true));if(history.length()==0)hint(R.string.empty);
+    area.addView(text(getString(R.string.history),21,true));if(history.length()==0)hint(R.string.empty);
     for(int i=0;i<history.length();i++){JSONObject x=history.optJSONObject(i);if(x!=null)entry("+"+x.optString("number"),x.optString("message"),()->{phone="+"+x.optString("number");msg=x.optString("message");tab=0;draw();},()->{remove("history",x);draw();});}
     if(history.length()>0)area.addView(button(R.string.clear_history,()->confirmClear(false)));
   }
@@ -187,7 +187,7 @@ public class MainActivity extends Activity {
     if("favorites".equals(key))favorites=next;else if("history".equals(key))history=next;else templates=next;save(key,next);
   }
   private void drawTemplates(){
-    area.addView(text(getString(R.string.templates),19,true));label(R.string.template_title);
+    area.addView(text(getString(R.string.templates),21,true));hint(R.string.templates_intro);label(R.string.template_title);
     EditText name=edit("",R.string.template_title,InputType.TYPE_CLASS_TEXT);area.addView(name);
     label(R.string.template_text);EditText body=edit("",R.string.template_hint,InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_MULTI_LINE);
     body.setSingleLine(false);body.setMinLines(3);area.addView(body);
@@ -200,7 +200,16 @@ public class MainActivity extends Activity {
     for(int i=0;i<templates.length();i++){JSONObject x=templates.optJSONObject(i);if(x!=null)entry(x.optString("name"),x.optString("body"),()->{msg=x.optString("body");tab=0;draw();},()->{remove("templates",x);draw();});}
   }
   private void drawSettings(){
-    area.addView(text(getString(R.string.privacy),19,true));hint(R.string.privacy_copy);hint(R.string.independent);
+    area.addView(text(getString(R.string.language_label),21,true));
+    Spinner language=spinner(new String[]{getString(R.string.language_system),getString(R.string.language_es),getString(R.string.language_en)},getLanguageChoice());
+    area.addView(language);
+    area.addView(button(R.string.apply_language,()->{
+      int selected=language.getSelectedItemPosition();
+      String value=selected==1?"es":selected==2?"en":"system";
+      getSharedPreferences("chat_facil_settings",MODE_PRIVATE).edit().putString("language",value).apply();
+      recreate();
+    }));
+    area.addView(text(getString(R.string.privacy),21,true));hint(R.string.privacy_copy);hint(R.string.independent);
     area.addView(button(R.string.privacy_policy,()->{
       try{startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("https://tommymsc.github.io/chat-facil-privacy.html")));}
       catch(Exception e){Toast.makeText(this,R.string.error_open,Toast.LENGTH_SHORT).show();}
@@ -210,6 +219,10 @@ public class MainActivity extends Activity {
     area.addView(button(R.string.clear_history,()->confirmClear(false)));
     area.addView(button(R.string.clear_all,()->confirmClear(true)));
     if(!BuildConfig.REAL_ADS)hint(R.string.ads_notice);
+  }
+  private int getLanguageChoice(){
+    String current=getSharedPreferences("chat_facil_settings",MODE_PRIVATE).getString("language","system");
+    return "es".equals(current)?1:"en".equals(current)?2:0;
   }
   private void confirmClear(boolean all){
     new AlertDialog.Builder(this).setMessage(R.string.confirm_delete).setNegativeButton(android.R.string.cancel,null)
@@ -237,5 +250,5 @@ public class MainActivity extends Activity {
   }
   @Override protected void onPause(){if(banner!=null)banner.pause();super.onPause();}
   @Override protected void onResume(){super.onResume();if(banner!=null)banner.resume();}
-  @Override protected void onDestroy(){if(banner!=null)banner.destroy();super.onDestroy();}
+  @Override protected void onDestroy(){if(banner!=null){banner.destroy();banner=null;}super.onDestroy();}
 }
