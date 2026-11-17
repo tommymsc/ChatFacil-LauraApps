@@ -14,7 +14,9 @@ public final class PhoneNumbers {
             if (callingCode == null || !callingCode.matches("[0-9]{1,3}")) return null;
             // Allow a user to paste a fully qualified number without a + sign when identifiable.
             // Do not guess ambiguous numbers; user can always add + for international numbers.
-            number = callingCode + cleaned;
+            // North American users often paste 11 digits beginning with the country code.
+            if ("1".equals(callingCode) && cleaned.length() == 11 && cleaned.startsWith("1")) number = cleaned;
+            else number = callingCode + cleaned;
         }
         if (!number.matches("[1-9][0-9]{7,14}")) return null;
         return number;
