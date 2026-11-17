@@ -14,4 +14,14 @@
 <string name="received">Shared text received. Check the phone number.</string>
 <string name="country_dominican">Dominican Republic</string><string name="country_mexico">Mexico</string><string name="country_colombia">Colombia</string><string name="country_spain">Spain</string><string name="country_us">United States</string><string name="country_argentina">Argentina</string><string name="country_peru">Peru</string><string name="country_chile">Chile</string><string name="country_brazil">Brazil</string><string name="country_venezuela">Venezuela</string>
 <string name="choose_template">Use template</string><string name="ads_notice">Test ads in this version.</string>
+<string name="hero_title">Start a chat without saving</string>
+<string name="hero_subtitle">Paste a number, prepare your message, and open a chat in seconds.</string>
+<string name="chat_app_label">Open with</string>
+<string name="manual_send_note">Messages are never sent automatically. You decide when to send.</string>
+<string name="templates_intro">Create reusable texts for individual conversations.</string>
+<string name="language_label">App language</string>
+<string name="language_system">Automatic (phone language)</string>
+<string name="language_es">Español</string>
+<string name="language_en">English</string>
+<string name="apply_language">Apply language</string>
 </resources>
