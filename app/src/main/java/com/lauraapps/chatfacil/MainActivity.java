@@ -35,7 +35,6 @@ public class MainActivity extends Activity {
   private android.content.SharedPreferences prefs;
   private ConsentInformation consent;
   private boolean adsReady=false;
-  private boolean adsLoading=false;
   private AdView banner;
   private TextView liveStatus;
 
@@ -294,23 +293,28 @@ public class MainActivity extends Activity {
     new AlertDialog.Builder(this).setMessage(R.string.confirm_delete).setNegativeButton(android.R.string.cancel,null)
       .setPositiveButton(R.string.delete,(d,w)->{
         history=new JSONArray();save("history",history);
-        if(all){favorites=new JSONArray();templates=new JSONArray();save("favorites",favorites);save("templates",templates);}
+        if(all){
+          favorites=new JSONArray();templates=new JSONArray();save("favorites",favorites);save("templates",templates);
+          phone="";msg="";selectedCountry=defaultCountry();selectedApp=0;
+          prefs.edit().remove("selected_country").remove("selected_app").apply();
+        }
         draw();
       }).show();
   }
   private void requestConsent(){
     consent=UserMessagingPlatform.getConsentInformation(this);
     consent.requestConsentInfoUpdate(this,new ConsentRequestParameters.Builder().build(),()->{
-      UserMessagingPlatform.loadAndShowConsentFormIfRequired(this,error->{if(consent.canRequestAds())startAds();});
+      if(isFinishing() || isDestroyed())return;
+      UserMessagingPlatform.loadAndShowConsentFormIfRequired(this,error->{if(!isFinishing() && !isDestroyed() && consent.canRequestAds())startAds();});
       if(consent.canRequestAds())startAds();
-    },error->{if(consent.canRequestAds())startAds();});
+    },error->{if(!isFinishing() && !isDestroyed() && consent.canRequestAds())startAds();});
   }
   private void startAds(){
     if(adsReady)return;adsReady=true;
     MobileAds.initialize(getApplicationContext(),info->runOnUiThread(this::showBanner));
   }
   private void showBanner(){
-    if(!adsReady || adsArea==null)return;
+    if(!adsReady || adsArea==null || isFinishing() || isDestroyed())return;
     if(banner!=null){
       if(banner.getParent() instanceof android.view.ViewGroup)((android.view.ViewGroup)banner.getParent()).removeView(banner);
       adsArea.addView(banner);return;
