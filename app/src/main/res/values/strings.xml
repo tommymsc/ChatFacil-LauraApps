@@ -14,4 +14,14 @@
 <string name="received">Texto compartido recibido. Comprueba el número.</string>
 <string name="country_dominican">República Dominicana</string><string name="country_mexico">México</string><string name="country_colombia">Colombia</string><string name="country_spain">España</string><string name="country_us">Estados Unidos</string><string name="country_argentina">Argentina</string><string name="country_peru">Perú</string><string name="country_chile">Chile</string><string name="country_brazil">Brasil</string><string name="country_venezuela">Venezuela</string>
 <string name="choose_template">Usar plantilla</string><string name="ads_notice">Anuncios de prueba en esta versión.</string>
+<string name="hero_title">Habla sin guardar el contacto</string>
+<string name="hero_subtitle">Copia un número, prepara tu mensaje y abre el chat en segundos.</string>
+<string name="chat_app_label">Abrir con</string>
+<string name="manual_send_note">El mensaje no se envía automáticamente. Tú decides cuándo enviarlo.</string>
+<string name="templates_intro">Prepara textos frecuentes para utilizarlos de forma individual.</string>
+<string name="language_label">Idioma de la aplicación</string>
+<string name="language_system">Automático (idioma del teléfono)</string>
+<string name="language_es">Español</string>
+<string name="language_en">English</string>
+<string name="apply_language">Aplicar idioma</string>
 </resources>
