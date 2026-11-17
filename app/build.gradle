@@ -11,8 +11,8 @@ android {
         applicationId 'com.lauraapps.chatfacil'
         minSdk 24
         targetSdk 36
-        versionCode 4
-        versionName '1.0.3'
+        versionCode 5
+        versionName '1.0.4'
         manifestPlaceholders = [adMobAppId: validReal ? appAdId : 'ca-app-pub-3940256099942544~3347511713']
         buildConfigField 'boolean', 'REAL_ADS', validReal.toString()
         buildConfigField 'String', 'BANNER_ID', '"' + (validReal ? bannerAdId : 'ca-app-pub-3940256099942544/6300978111') + '"'
@@ -20,8 +20,20 @@ android {
     buildFeatures { buildConfig true }
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
     buildTypes {
-        debug { applicationIdSuffix '.debug'; versionNameSuffix '-debug' }
-        release { minifyEnabled false }
+        debug {
+            applicationIdSuffix '.debug'
+            versionNameSuffix '-debug'
+            manifestPlaceholders = [adMobAppId: 'ca-app-pub-3940256099942544~3347511713']
+            buildConfigField 'boolean', 'REAL_ADS', 'false'
+            buildConfigField 'String', 'BANNER_ID', '"ca-app-pub-3940256099942544/6300978111"'
+        }
+        release {
+            minifyEnabled false
+            // Only release builds can receive the app-specific real AdMob identifiers.
+            manifestPlaceholders = [adMobAppId: validReal ? appAdId : 'ca-app-pub-3940256099942544~3347511713']
+            buildConfigField 'boolean', 'REAL_ADS', validReal.toString()
+            buildConfigField 'String', 'BANNER_ID', '"' + (validReal ? bannerAdId : 'ca-app-pub-3940256099942544/6300978111') + '"'
+        }
     }
 }
 dependencies {
