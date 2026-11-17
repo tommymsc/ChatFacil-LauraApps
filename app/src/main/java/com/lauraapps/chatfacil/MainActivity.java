@@ -37,10 +37,16 @@ public class MainActivity extends Activity {
     getWindow().setStatusBarColor(INK);
     prefs=getSharedPreferences("chat_facil_private",MODE_PRIVATE);
     history=load("history"); favorites=load("favorites"); templates=load("templates");
+    selectedCountry=prefs.getInt("selected_country",defaultCountry());
+    selectedApp=prefs.getInt("selected_app",0);
     readShare(getIntent());draw();requestConsent();
   }
   @Override protected void onNewIntent(Intent intent){
     super.onNewIntent(intent);setIntent(intent);readShare(intent);tab=0;draw();
+  }
+  private int defaultCountry(){
+    String country=java.util.Locale.getDefault().getCountry();
+    switch(country){case "MX":return 1;case "CO":return 2;case "ES":return 3;case "US":return 4;case "AR":return 5;case "PE":return 6;case "CL":return 7;case "BR":return 8;case "VE":return 9;default:return 0;}
   }
   private JSONArray load(String key){try{return new JSONArray(prefs.getString(key,"[]"));}catch(Exception e){return new JSONArray();}}
   private void save(String key,JSONArray arr){prefs.edit().putString(key,arr.toString()).apply();}
@@ -72,6 +78,7 @@ public class MainActivity extends Activity {
     if(tab==0 && phoneField!=null && msgField!=null){
       phone=phoneField.getText().toString();msg=msgField.getText().toString();
       selectedCountry=countryField.getSelectedItemPosition();selectedApp=appField.getSelectedItemPosition();
+      prefs.edit().putInt("selected_country",selectedCountry).putInt("selected_app",selectedApp).apply();
     }
   }
   private void draw(){
@@ -106,7 +113,7 @@ public class MainActivity extends Activity {
     label(R.string.number);phoneField=edit(phone,R.string.number_hint,InputType.TYPE_CLASS_PHONE);area.addView(phoneField);
     area.addView(button(R.string.paste,()->{
       ClipboardManager c=(ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
-      if(c!=null && c.hasPrimaryClip()){
+      if(c!=null && c.hasPrimaryClip() && c.getPrimaryClip()!=null && c.getPrimaryClip().getItemCount()>0){
         CharSequence value=c.getPrimaryClip().getItemAt(0).coerceToText(this);
         Matcher m=Pattern.compile("(?:\\+|00)?[0-9][0-9 ()\\-.]{6,24}[0-9]").matcher(value);
         phoneField.setText(m.find()?m.group():value);phoneField.setSelection(phoneField.length());
@@ -140,6 +147,7 @@ public class MainActivity extends Activity {
   }
   private void openChat(){
     String u=link();if(u==null)return;
+    rememberFields();
     Intent i=new Intent(Intent.ACTION_VIEW,Uri.parse(u));
     int mode=appField.getSelectedItemPosition();
     if(mode!=0)i.setPackage(mode==1?"com.whatsapp":"com.whatsapp.w4b");
