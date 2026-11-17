@@ -26,8 +26,8 @@ jobs:
           mkdir -p app/src/main/res/drawable-nodpi
           base64 --decode app/brand/icon-96.webp.base64 > app/src/main/res/drawable-nodpi/launcher.webp
           file app/src/main/res/drawable-nodpi/launcher.webp
-      - name: Build APK with test ad IDs
-        run: gradle --no-daemon :app:assembleDebug --stacktrace
+      - name: Run unit tests and build APK with test ad IDs
+        run: gradle --no-daemon :app:testDebugUnitTest :app:assembleDebug --stacktrace
       - uses: actions/upload-artifact@v4
         with:
           name: ChatFacil-debug-APK
