@@ -18,6 +18,12 @@ import android.text.TextUtils;
 import android.view.*;
 import android.widget.*;
 import com.google.android.gms.ads.*;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.AdError;
+import com.google.android.gms.ads.LoadAdError;
+import android.os.SystemClock;
 import com.google.android.ump.*;
 import org.json.*;
 import java.util.regex.*;
@@ -36,6 +42,9 @@ public class MainActivity extends Activity {
   private ConsentInformation consent;
   private boolean adsReady=false;
   private AdView banner;
+  private InterstitialAd interstitial;
+  private int eligibleTabTransitions=0;
+  private long lastInterstitialShownAt=0L;
   private TextView liveStatus;
 
   @Override protected void attachBaseContext(Context base){super.attachBaseContext(Language.wrap(base));}
@@ -118,7 +127,7 @@ public class MainActivity extends Activity {
     String[] symbols={"✉  ","◷  ","▤  ","⚙  "};
     for(int i=0;i<4;i++){final int j=i;TextView t=text(symbols[i]+getString(names[i]),12,i==tab);t.setGravity(Gravity.CENTER);t.setTextColor(i==tab?GREEN:MUTE);if(i==tab)t.setBackgroundColor(0xffe7f7f3);
       t.setPadding(dp(1),dp(12),dp(1),dp(12));tabs.addView(t,new LinearLayout.LayoutParams(0,dp(51),1));
-      t.setOnClickListener(v->{showFeedback(v);rememberFields();tab=j;draw();});
+      t.setOnClickListener(v->{showFeedback(v);rememberFields();if(j==tab)return;if(!tryShowInterstitial(j)){tab=j;draw();}});
     }base.addView(tabs);
     ScrollView scroll=new ScrollView(this);scroll.setFillViewport(false);area=col();area.setPadding(dp(16),dp(15),dp(16),dp(22));scroll.addView(area);base.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
     if(tab==0)drawChat();else if(tab==1)drawRecent();else if(tab==2)drawTemplates();else drawSettings();
@@ -311,7 +320,7 @@ public class MainActivity extends Activity {
   }
   private void startAds(){
     if(adsReady)return;adsReady=true;
-    MobileAds.initialize(getApplicationContext(),info->runOnUiThread(this::showBanner));
+    MobileAds.initialize(getApplicationContext(),info->runOnUiThread(()->{if(!isFinishing() && !isDestroyed()){showBanner();loadInterstitial();}}));
   }
   private void showBanner(){
     if(!adsReady || adsArea==null || isFinishing() || isDestroyed())return;
@@ -322,7 +331,29 @@ public class MainActivity extends Activity {
     banner=new AdView(this);banner.setAdUnitId(BuildConfig.BANNER_ID);banner.setAdSize(AdSize.BANNER);
     adsArea.addView(banner);banner.loadAd(new AdRequest.Builder().build());
   }
+  private void loadInterstitial(){
+    if(!adsReady || isFinishing() || isDestroyed() || interstitial!=null)return;
+    InterstitialAd.load(this,BuildConfig.INTERSTITIAL_ID,new AdRequest.Builder().build(),new InterstitialAdLoadCallback(){
+      @Override public void onAdLoaded(InterstitialAd ad){if(!isFinishing() && !isDestroyed())interstitial=ad;}
+      @Override public void onAdFailedToLoad(LoadAdError error){interstitial=null;}
+    });
+  }
+  private boolean tryShowInterstitial(int destination){
+    // Only between sections; never when the user is opening a chat or sending/sharing a link.
+    if(!adsReady || isFinishing() || isDestroyed())return false;
+    eligibleTabTransitions++;
+    if(eligibleTabTransitions<4 || interstitial==null)return false;
+    if(lastInterstitialShownAt!=0 && SystemClock.elapsedRealtime()-lastInterstitialShownAt<8*60*1000L)return false;
+    InterstitialAd ad=interstitial;interstitial=null;
+    ad.setFullScreenContentCallback(new FullScreenContentCallback(){
+      @Override public void onAdShowedFullScreenContent(){lastInterstitialShownAt=SystemClock.elapsedRealtime();eligibleTabTransitions=0;}
+      @Override public void onAdDismissedFullScreenContent(){if(!isFinishing() && !isDestroyed()){tab=destination;draw();loadInterstitial();}}
+      @Override public void onAdFailedToShowFullScreenContent(AdError error){if(!isFinishing() && !isDestroyed()){tab=destination;draw();loadInterstitial();}}
+    });
+    ad.show(this);
+    return true;
+  }
   @Override protected void onPause(){if(banner!=null)banner.pause();super.onPause();}
   @Override protected void onResume(){super.onResume();if(banner!=null)banner.resume();}
-  @Override protected void onDestroy(){if(banner!=null){banner.destroy();banner=null;}super.onDestroy();}
+  @Override protected void onDestroy(){if(banner!=null){banner.destroy();banner=null;}interstitial=null;super.onDestroy();}
 }

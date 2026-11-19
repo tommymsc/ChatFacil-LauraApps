@@ -1,8 +1,9 @@
 plugins { id 'com.android.application' }
 def realAds = providers.gradleProperty('enableRealAds').orElse('false').get().toBoolean()
-def appAdId = providers.gradleProperty('adMobAppId').orElse('').get()
-def bannerAdId = providers.gradleProperty('adMobBannerId').orElse('').get()
-def validReal = realAds && appAdId ==~ /ca-app-pub-\d{16}~\d{10}/ && bannerAdId ==~ /ca-app-pub-\d{16}\/\d{10}/
+def appAdId = providers.gradleProperty('adMobAppId').orElse('ca-app-pub-2506564165861733~1071661556').get()
+def bannerAdId = providers.gradleProperty('adMobBannerId').orElse('ca-app-pub-2506564165861733/3799052197').get()
+def interstitialAdId = providers.gradleProperty('adMobInterstitialId').orElse('ca-app-pub-2506564165861733/3586144251').get()
+def validReal = realAds && appAdId ==~ /ca-app-pub-\d{16}~\d{10}/ && bannerAdId ==~ /ca-app-pub-\d{16}\/\d{10}/ && interstitialAdId ==~ /ca-app-pub-\d{16}\/\d{10}/
 if (realAds && !validReal) throw new GradleException('IDs reales AdMob inválidos')
 android {
     namespace 'com.lauraapps.chatfacil'
@@ -11,14 +12,26 @@ android {
         applicationId 'com.lauraapps.chatfacil'
         minSdk 24
         targetSdk 36
-        versionCode 5
-        versionName '1.0.4'
+        versionCode 7
+        versionName '1.0.6'
         manifestPlaceholders = [adMobAppId: validReal ? appAdId : 'ca-app-pub-3940256099942544~3347511713']
         buildConfigField 'boolean', 'REAL_ADS', validReal.toString()
         buildConfigField 'String', 'BANNER_ID', '"' + (validReal ? bannerAdId : 'ca-app-pub-3940256099942544/6300978111') + '"'
+        buildConfigField 'String', 'INTERSTITIAL_ID', '"' + (validReal ? interstitialAdId : 'ca-app-pub-3940256099942544/1033173712') + '"'
     }
     buildFeatures { buildConfig true }
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    signingConfigs {
+        if (System.getenv('ANDROID_KEYSTORE_PATH') && System.getenv('ANDROID_KEYSTORE_PASSWORD') &&
+            System.getenv('ANDROID_KEY_ALIAS') && System.getenv('ANDROID_KEY_PASSWORD')) {
+            release {
+                storeFile file(System.getenv('ANDROID_KEYSTORE_PATH'))
+                storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('ANDROID_KEY_ALIAS')
+                keyPassword System.getenv('ANDROID_KEY_PASSWORD')
+            }
+        }
+    }
     buildTypes {
         debug {
             applicationIdSuffix '.debug'
@@ -26,13 +39,16 @@ android {
             manifestPlaceholders = [adMobAppId: 'ca-app-pub-3940256099942544~3347511713']
             buildConfigField 'boolean', 'REAL_ADS', 'false'
             buildConfigField 'String', 'BANNER_ID', '"ca-app-pub-3940256099942544/6300978111"'
+            buildConfigField 'String', 'INTERSTITIAL_ID', '"ca-app-pub-3940256099942544/1033173712"'
         }
         release {
+            if (signingConfigs.findByName('release') != null) signingConfig signingConfigs.release
             minifyEnabled false
             // Only release builds can receive the app-specific real AdMob identifiers.
             manifestPlaceholders = [adMobAppId: validReal ? appAdId : 'ca-app-pub-3940256099942544~3347511713']
             buildConfigField 'boolean', 'REAL_ADS', validReal.toString()
             buildConfigField 'String', 'BANNER_ID', '"' + (validReal ? bannerAdId : 'ca-app-pub-3940256099942544/6300978111') + '"'
+            buildConfigField 'String', 'INTERSTITIAL_ID', '"' + (validReal ? interstitialAdId : 'ca-app-pub-3940256099942544/1033173712') + '"'
         }
     }
 }

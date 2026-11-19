@@ -3,12 +3,13 @@
 ## AdMob antes de producción
 
 1. En AdMob crea una app **Android** llamada `Chat Fácil: Sin Guardar Número` con estado **No publicada**.
-2. Crea una unidad **Banner**, sin anuncios invasivos al abrir chats.
-3. Conserva los dos identificadores:
-   - ID de aplicación: `ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY`.
-   - ID del banner: `ca-app-pub-XXXXXXXXXXXXXXXX/ZZZZZZZZZZ`.
+2. Utiliza las unidades **Banner** e **Intersticial**. El intersticial solo puede aparecer al cambiar de sección después de varias transiciones, con un intervalo mínimo de 8 minutos. No aparece al abrir chats ni al compartir enlaces.
+3. Identificadores de producción de Chat Fácil:
+   - Aplicación: `ca-app-pub-2506564165861733~1071661556`.
+   - Banner: `ca-app-pub-2506564165861733/3799052197`.
+   - Intersticial: `ca-app-pub-2506564165861733/3586144251`.
 4. Configura mensajes de consentimiento UMP donde se requieran, y verifica el formulario de privacidad.
-5. Los APK `debug` SIEMPRE usan anuncios de prueba oficiales de Google, sin importar propiedades configuradas. Para `release`, Gradle exige `-PenableRealAds=true -PadMobAppId=... -PadMobBannerId=...` y falla sin identificadores reales.
+5. Los APK `debug` SIEMPRE usan anuncios de prueba oficiales de Google. Los IDs reales ya están en la configuración `release` y se activan con `-PenableRealAds=true`; pueden sobrescribirse con `-PadMobAppId=... -PadMobBannerId=... -PadMobInterstitialId=...`. Sin activación, el `release` sigue bloqueado. Evita clics reales en anuncios durante las pruebas.
 6. Una vez publicada en Google Play y accesible públicamente, vincula su ficha desde AdMob. La revisión completa y la autorización de app-ads.txt pueden depender de que esté publicada y vinculada.
 7. Verifica que en la ficha de Google Play el sitio web sea `https://tommymsc.github.io/`, y que el archivo `https://tommymsc.github.io/app-ads.txt` incluya el editor correcto.
 8. Revisa en Play Console y AdMob las declaraciones de uso de datos del SDK Mobile Ads, UMP e ID de publicidad antes de publicar.
